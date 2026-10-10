@@ -4,7 +4,10 @@ namespace CSharpEssentials.RequestResponseLogging.Infrastructure.MessageCreators
 
 internal abstract class BaseLogMessageCreator
 {
-    protected static string? GenerateLogStringByField(RequestResponseContext requestResponseContext, LoggingOptions loggingOptions, LogFields field)
+    protected static string? GenerateLogStringByField(RequestResponseContext requestResponseContext, LoggingOptions loggingOptions, LogFields field) =>
+        EscapeLineBreaks(GetFieldValue(requestResponseContext, loggingOptions, field));
+
+    private static string? GetFieldValue(RequestResponseContext requestResponseContext, LoggingOptions loggingOptions, LogFields field)
     {
         return field switch
         {
@@ -33,5 +36,15 @@ internal abstract class BaseLogMessageCreator
 
         return $"[{string.Join(",", filteredHeaders)}]";
     }
+
+    private static string? EscapeLineBreaks(string? value) =>
+        value?
+            .Replace("\r", @"\r", StringComparison.Ordinal)
+            .Replace("\n", @"\n", StringComparison.Ordinal)
+            .Replace("\v", @"\v", StringComparison.Ordinal)
+            .Replace("\f", @"\f", StringComparison.Ordinal)
+            .Replace("\u0085", @"\u0085", StringComparison.Ordinal)
+            .Replace("\u2028", @"\u2028", StringComparison.Ordinal)
+            .Replace("\u2029", @"\u2029", StringComparison.Ordinal);
 
 }

@@ -50,11 +50,13 @@ The level, fields and format come from `LoggingOptions`:
 | `HeaderKeys` | none | The request headers written by the `Headers` field (`HeaderKeys.Add("Accept-Language")`). With no keys the field is empty, so credentials are not logged by default; with keys it is a list of the matching headers (`[{"Accept-Language":"tr"}]`, `[]` when none is on the request). Names are compared case-sensitively with the spelling the server received: Kestrel normalizes the standard names (`accept-language` matches `Accept-Language`), but a custom header must match as sent (`X-Correlation-Id` does not match `x-correlation-id`, which is how HTTP/2 clients send it). Assign `new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "X-Correlation-Id" }` to ignore the case |
 | `LoggingLevel` | `Information` | |
 | `LoggerCategoryName` | `RequestResponseLogger` | |
-| `UseSeparateContext` | `true` | `true` writes one named placeholder per field (`{Path}`, `{Method}`, ...) so structured logging providers get each value as a property; `false` writes one formatted text |
+| `UseSeparateContext` | `true` | `true` writes one named placeholder per field (`{Path}`, `{Method}`, ...) so structured logging providers get each value as a property; `false` writes one formatted text as the single property `RequestResponseLog` (template `{RequestResponseLog:l}`). In both modes the message template never contains request or response data |
 
 `RequestLength` and `ResponseLength` are the number of characters of the logged body text, not bytes and not the `Content-Length`. The texts above count too, so a request without a body reports the 18 characters of `Empty request body`.
 
 Bodies can contain personal data and secrets; log them only where that is acceptable, ignore sensitive paths and mark endpoints with the skip attributes.
+
+Line breaks in logged values (CR, LF, VT, FF, U+0085, U+2028, U+2029) are written as the escape sequences `\r`, `\n`, `\v`, `\f`, `\u0085`, `\u2028` and `\u2029`, so a body, path or header cannot start a line that looks like another field or another log entry. A multi-line body is logged on one line. Backslashes are not escaped, so an escaped line break reads the same as the same characters sent literally.
 
 ### Per-Endpoint Control
 

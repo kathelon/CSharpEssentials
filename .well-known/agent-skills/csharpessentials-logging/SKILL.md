@@ -60,7 +60,8 @@ app.AddRequestResponseLogging(opt =>
 `LogFields`: `Request`, `Response`, `HostName`, `Path`, `Method`, `QueryString`, `Headers`, `ResponseTiming`, `RequestLength`, `ResponseLength`. `LoggingOptions.CreateAllFields()` selects all of them; the default list is empty.
 
 - The `Headers` field writes only the request headers in `HeaderKeys` (`[{"X-Correlation-Id":"..."}]`, `[]` when none is present); with no keys it is empty, so credentials are not logged by default. Names are compared case-sensitively with the spelling received: standard names are normalized by Kestrel, a custom header must match as sent (HTTP/2 sends lower-case). Use `logging.HeaderKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "X-Correlation-Id" }` to ignore the case.
-- `UseSeparateContext` (default `true`) writes one named placeholder per field (`{Path}`, `{Method}`) for structured logging providers; `false` writes one formatted text.
+- `UseSeparateContext` (default `true`) writes one named placeholder per field (`{Path}`, `{Method}`) for structured logging providers; `false` writes one formatted text as the property `RequestResponseLog`. The message template never contains request data.
+- Line breaks in logged values are escaped (`\r`, `\n`, `\v`, `\f`, `\u0085`, `\u2028`, `\u2029`), so request data cannot forge log lines; a multi-line body is logged on one line.
 - `LoggingLevel` defaults to `Information` and `LoggerCategoryName` to `RequestResponseLogger`.
 - `RequestLength` and `ResponseLength` count characters of the logged text, not bytes; a request without a body reports the 18 characters of `Empty request body`.
 
